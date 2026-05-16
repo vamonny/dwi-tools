@@ -1,0 +1,315 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dark What Ifs — Command Center</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07070a;--bg2:#0f0f14;--bg3:#16161d;--text:#eeeef0;--text2:#7a7a8a;--accent:#7c5cfc;--accent2:#5b3fd4;--green:#22c55e;--border:rgba(255,255,255,0.06);--glow:rgba(124,92,252,0.15)}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app{max-width:1400px;margin:0 auto;padding:24px}
+h1{font-size:1.8rem;font-weight:800;margin-bottom:4px}
+.subtitle{color:var(--text2);font-size:.85rem;margin-bottom:32px}
+.tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--bg2);padding:4px;border-radius:12px;border:1px solid var(--border)}
+.tab{padding:12px 24px;border-radius:10px;border:none;background:transparent;color:var(--text2);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+.tab.active{background:var(--accent);color:white;box-shadow:0 4px 16px var(--glow)}
+.tab:hover:not(.active){color:var(--text);background:var(--bg3)}
+.panel{display:none}
+.panel.active{display:block}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:16px}
+.card h3{font-size:1.1rem;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.input-group{margin-bottom:16px}
+.input-group label{display:block;font-size:.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+input[type="text"],textarea{width:100%;padding:14px 18px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.9rem;font-family:inherit;outline:none;transition:border .2s}
+input:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:80px}
+.btn{padding:12px 28px;border-radius:10px;border:none;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--accent);color:white;box-shadow:0 4px 16px var(--glow)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--glow)}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+.result{margin-top:20px;padding:20px;background:var(--bg);border:1px solid var(--border);border-radius:12px;white-space:pre-wrap;font-size:.85rem;line-height:1.7;max-height:500px;overflow-y:auto}
+.result:empty{display:none}
+.loading{color:var(--accent);font-style:italic}
+.grid-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.link-card{display:block;padding:18px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);transition:all .2s}
+.link-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.link-card .cat{font-size:.65rem;color:var(--accent);text-transform:uppercase;letter-spacing:1px}
+.link-card h4{font-size:.95rem;margin:4px 0}
+.link-card p{font-size:.75rem;color:var(--text2)}
+.badge{display:inline-block;margin-top:8px;padding:3px 8px;background:rgba(34,197,94,0.12);color:var(--green);border-radius:6px;font-size:.65rem;font-weight:600}
+.stats-row{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.stat-chip{padding:6px 12px;background:var(--bg3);border-radius:8px;font-size:.75rem;color:var(--text2)}
+.stat-chip b{color:var(--text)}
+.copy-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:.75rem;cursor:pointer;margin-top:8px}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>🎬 Dark What Ifs</h1>
+<p class="subtitle">Command Center — парсер, генератор, инструменты</p>
+
+<div class="tabs">
+<button class="tab active" onclick="showTab('optimize')">✨ Оптимизатор</button>
+<button class="tab" onclick="showTab('parser')">🔍 Парсер Shorts</button>
+<button class="tab" onclick="showTab('competitor')">📊 Конкуренты</button>
+<button class="tab" onclick="showTab('tools')">🛠 AI Инструменты</button>
+</div>
+
+<!-- OPTIMIZE TAB -->
+<div class="panel active" id="panel-optimize">
+<div class="card">
+<h3>✨ Оптимизатор заголовка</h3>
+<p style="color:var(--text2);font-size:.8rem;margin-bottom:16px">Вставь заголовок на русском или английском — AI улучшит его для максимального охвата, переведёт и подберёт хештеги.</p>
+<div class="input-group">
+<label>Заголовок / тема видео</label>
+<input type="text" id="titleInput" placeholder="Например: что если американец попал в русскую тюрьму">
+</div>
+<button class="btn btn-primary" onclick="optimizeTitle()">Оптимизировать</button>
+<div class="result" id="optimizeResult"></div>
+</div>
+
+<div class="card">
+<h3>📝 Генератор сценария</h3>
+<p style="color:var(--text2);font-size:.8rem;margin-bottom:16px">Введи тему — AI напишет сценарий для Shorts с раскадровкой.</p>
+<div class="input-group">
+<label>Тема видео</label>
+<input type="text" id="scriptInput" placeholder="What if an American went to Russian school">
+</div>
+<button class="btn btn-primary" onclick="generateScript()">Сгенерировать</button>
+<div class="result" id="scriptResult"></div>
+</div>
+</div>
+
+<!-- PARSER TAB -->
+<div class="panel" id="panel-parser">
+<div class="card">
+<h3>🔍 Парсер YouTube Shorts</h3>
+<p style="color:var(--text2);font-size:.8rem;margin-bottom:16px">Ищет вирусные Shorts, собирает просмотры, хештеги, теги. Показывает что залетает.</p>
+<div class="input-group">
+<label>Поисковый запрос (на английском)</label>
+<input type="text" id="searchInput" placeholder="what if russia, russian prison, culture shock">
+</div>
+<button class="btn btn-primary" onclick="searchShorts()">Найти</button>
+<div class="result" id="searchResult"></div>
+</div>
+</div>
+
+<!-- COMPETITOR TAB -->
+<div class="panel" id="panel-competitor">
+<div class="card">
+<h3>📊 Анализ канала конкурента</h3>
+<p style="color:var(--text2);font-size:.8rem;margin-bottom:16px">Вставь ID или username канала — покажет их лучшие видео и статистику.</p>
+<div class="input-group">
+<label>ID канала (из URL: youtube.com/channel/XXXXX или @username)</label>
+<input type="text" id="channelInput" placeholder="@60SecondClub или UCxxxxx">
+</div>
+<button class="btn btn-primary" onclick="analyzeChannel()">Анализировать</button>
+<div class="result" id="channelResult"></div>
+</div>
+</div>
+
+<!-- TOOLS TAB -->
+<div class="panel" id="panel-tools">
+<div class="card">
+<h3>🛠 AI Инструменты</h3>
+<div class="grid-links">
+<a href="https://seaart.ai" target="_blank" class="link-card"><div class="cat">Картинки</div><h4>SeaArt.ai</h4><p>100+ генераций/день, Flux модель</p><span class="badge">Бесплатно</span></a>
+<a href="https://tensor.art" target="_blank" class="link-card"><div class="cat">Картинки</div><h4>Tensor.art</h4><p>Безлимит, много моделей</p><span class="badge">Бесплатно</span></a>
+<a href="https://grok.com" target="_blank" class="link-card"><div class="cat">Картинки</div><h4>Grok (x.ai)</h4><p>Качество как DALL-E 3, щедрые лимиты</p><span class="badge">Бесплатно</span></a>
+<a href="https://klingai.com" target="_blank" class="link-card"><div class="cat">Видео</div><h4>Kling AI</h4><p>5 видео/день, image-to-video</p><span class="badge">Бесплатно</span></a>
+<a href="https://pixverse.ai" target="_blank" class="link-card"><div class="cat">Видео</div><h4>PixVerse</h4><p>Бесплатная генерация видео</p><span class="badge">Бесплатно</span></a>
+<a href="https://elevenlabs.io" target="_blank" class="link-card"><div class="cat">Озвучка</div><h4>ElevenLabs</h4><p>10 мин/мес, реалистичные голоса</p><span class="badge">Бесплатно</span></a>
+<a href="https://ttsmaker.com" target="_blank" class="link-card"><div class="cat">Озвучка</div><h4>TTSMaker</h4><p>Безлимит, много языков</p><span class="badge">Бесплатно</span></a>
+<a href="https://capcut.com" target="_blank" class="link-card"><div class="cat">Монтаж</div><h4>CapCut</h4><p>Монтаж + авто-субтитры</p><span class="badge">Бесплатно</span></a>
+<a href="https://pixabay.com/music" target="_blank" class="link-card"><div class="cat">Музыка</div><h4>Pixabay Music</h4><p>Без авторских прав</p><span class="badge">Бесплатно</span></a>
+<a href="https://studio.youtube.com" target="_blank" class="link-card"><div class="cat">YouTube</div><h4>YouTube Studio</h4><p>Загрузка и аналитика</p><span class="badge">—</span></a>
+</div>
+</div>
+</div>
+
+</div>
+
+<script>
+const YT_KEY = localStorage.getItem('yt_key') || '';
+
+// Auto-set keys on first visit
+if (!localStorage.getItem('groq_key')) {
+    const k = prompt('Введи Groq API ключ (gsk_...):'); if(k) localStorage.setItem('groq_key', k);
+    const y = prompt('Введи YouTube API ключ:'); if(y) localStorage.setItem('yt_key', y);
+    location.reload();
+}
+const GROQ_KEY = localStorage.getItem('groq_key') || '';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+
+function showTab(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    event.target.classList.add('active');
+}
+
+async function callAI(prompt) {
+    const res = await fetch(GROQ_URL, {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + GROQ_KEY, 'Content-Type': 'application/json'},
+        body: JSON.stringify({model: 'llama-3.3-70b-versatile', messages: [{role: 'user', content: prompt}], max_tokens: 2000})
+    });
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || 'Ошибка: ' + JSON.stringify(data);
+}
+
+async function optimizeTitle() {
+    const input = document.getElementById('titleInput').value;
+    if (!input) return;
+    const result = document.getElementById('optimizeResult');
+    result.innerHTML = '<span class="loading">⏳ Генерирую...</span>';
+
+    const prompt = `You are a YouTube Shorts viral title expert. Given this video topic: "${input}"
+
+Do the following:
+1. Translate to English if needed
+2. Generate 5 optimized clickbait titles (max 60 chars each) that maximize CTR
+3. Generate 15 best hashtags for this video
+4. Generate a short description (2 lines) optimized for YouTube SEO
+5. Suggest 10 hidden tags (for YouTube tag field)
+
+Format your response clearly with sections. Use emojis in titles where appropriate.`;
+
+    const text = await callAI(prompt);
+    result.innerHTML = text;
+}
+
+async function generateScript() {
+    const input = document.getElementById('scriptInput').value;
+    if (!input) return;
+    const result = document.getElementById('scriptResult');
+    result.innerHTML = '<span class="loading">⏳ Пишу сценарий...</span>';
+
+    const prompt = `Write a 60-second YouTube Shorts script about: "${input}"
+
+Requirements:
+- Hook in first 3 seconds (shocking statement or question)
+- 8 scenes, each with: [SCENE X] Narrator text | Visual description for AI image generation
+- Dramatic, engaging tone
+- End with a cliffhanger or powerful statement
+- English language
+- Add image generation prompts for each scene (hyper-realistic 3D render style, cinematic lighting, dark moody atmosphere, vertical 9:16)
+
+Format clearly.`;
+
+    const text = await callAI(prompt);
+    result.innerHTML = text;
+}
+
+async function searchShorts() {
+    const query = document.getElementById('searchInput').value;
+    if (!query) return;
+    const result = document.getElementById('searchResult');
+    result.innerHTML = '<span class="loading">⏳ Ищу...</span>';
+
+    try {
+        // Search
+        const searchRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=id,snippet&q=${encodeURIComponent(query + ' #shorts')}&type=video&videoDuration=short&order=viewCount&maxResults=20&key=${YT_KEY}`);
+        const searchData = await searchRes.json();
+        const items = searchData.items || [];
+
+        if (!items.length) { result.innerHTML = '❌ Ничего не найдено'; return; }
+
+        // Get stats
+        const ids = items.map(i => i.id.videoId).join(',');
+        const statsRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${ids}&key=${YT_KEY}`);
+        const statsData = await statsRes.json();
+
+        // Collect hashtags
+        const hashtagCount = {};
+        let output = `🏆 ТОП SHORTS: "${query}"\n${'='.repeat(50)}\n\n`;
+
+        const videos = (statsData.items || []).sort((a,b) => (parseInt(b.statistics.viewCount)||0) - (parseInt(a.statistics.viewCount)||0));
+
+        videos.forEach((v, i) => {
+            const views = parseInt(v.statistics.viewCount || 0);
+            const likes = parseInt(v.statistics.likeCount || 0);
+            const desc = v.snippet.description || '';
+            const title = v.snippet.title;
+            const hashtags = [...(desc + ' ' + title).matchAll(/#(\w+)/g)].map(m => m[1].toLowerCase());
+            hashtags.forEach(h => hashtagCount[h] = (hashtagCount[h]||0) + 1);
+
+            output += `${i+1}. ${title}\n`;
+            output += `   👁 ${(views/1000).toFixed(0)}K | 👍 ${likes} | 📺 ${v.snippet.channelTitle}\n`;
+            output += `   🔗 https://youtube.com/shorts/${v.id}\n`;
+            if (hashtags.length) output += `   # ${hashtags.slice(0,5).join(' #')}\n`;
+            output += '\n';
+        });
+
+        // Top hashtags
+        const sorted = Object.entries(hashtagCount).sort((a,b) => b[1]-a[1]).slice(0, 20);
+        output += `\n${'='.repeat(50)}\n🏷 ТОП ХЕШТЕГИ:\n\n`;
+        sorted.forEach(([tag, count]) => output += `#${tag} (${count}) ${'█'.repeat(Math.min(count*2, 20))}\n`);
+        output += `\n📋 Копируй: ${sorted.slice(0,10).map(([t])=>'#'+t).join(' ')}`;
+
+        result.innerHTML = output;
+    } catch(e) {
+        result.innerHTML = '❌ Ошибка: ' + e.message;
+    }
+}
+
+async function analyzeChannel() {
+    const input = document.getElementById('channelInput').value;
+    if (!input) return;
+    const result = document.getElementById('channelResult');
+    result.innerHTML = '<span class="loading">⏳ Анализирую канал...</span>';
+
+    try {
+        let channelId = input;
+
+        // If username, search for channel
+        if (input.startsWith('@') || !input.startsWith('UC')) {
+            const handle = input.replace('@', '');
+            const searchRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=id,snippet&q=${encodeURIComponent(handle)}&type=channel&maxResults=1&key=${YT_KEY}`);
+            const searchData = await searchRes.json();
+            if (searchData.items?.length) {
+                channelId = searchData.items[0].id.channelId;
+            } else {
+                result.innerHTML = '❌ Канал не найден'; return;
+            }
+        }
+
+        // Get channel info
+        const chRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${channelId}&key=${YT_KEY}`);
+        const chData = await chRes.json();
+        const ch = chData.items?.[0];
+        if (!ch) { result.innerHTML = '❌ Канал не найден'; return; }
+
+        // Get top videos
+        const vidRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=id,snippet&channelId=${channelId}&type=video&order=viewCount&maxResults=15&key=${YT_KEY}`);
+        const vidData = await vidRes.json();
+        const vidIds = (vidData.items||[]).map(i => i.id.videoId).join(',');
+
+        const statsRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${vidIds}&key=${YT_KEY}`);
+        const statsData = await statsRes.json();
+
+        let output = `📊 КАНАЛ: ${ch.snippet.title}\n${'='.repeat(50)}\n\n`;
+        output += `👥 Подписчики: ${parseInt(ch.statistics.subscriberCount).toLocaleString()}\n`;
+        output += `📹 Видео: ${ch.statistics.videoCount}\n`;
+        output += `👁 Всего просмотров: ${parseInt(ch.statistics.viewCount).toLocaleString()}\n\n`;
+        output += `🏆 ТОП ВИДЕО:\n\n`;
+
+        const topVids = (statsData.items||[]).sort((a,b) => parseInt(b.statistics.viewCount||0) - parseInt(a.statistics.viewCount||0));
+        const titles = (vidData.items||[]);
+
+        topVids.forEach((v, i) => {
+            const title = titles.find(t => t.id.videoId === v.id)?.snippet?.title || '';
+            const views = parseInt(v.statistics.viewCount || 0);
+            output += `${i+1}. ${title}\n   👁 ${(views/1000).toFixed(0)}K просмотров\n   🔗 https://youtube.com/watch?v=${v.id}\n\n`;
+        });
+
+        result.innerHTML = output;
+    } catch(e) {
+        result.innerHTML = '❌ Ошибка: ' + e.message;
+    }
+}
+</script>
+</body>
+</html>
