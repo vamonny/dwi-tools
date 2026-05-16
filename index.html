@@ -55,6 +55,7 @@ textarea{resize:vertical;min-height:80px}
 <button class="tab" onclick="showTab('parser')">🔍 Парсер Shorts</button>
 <button class="tab" onclick="showTab('competitor')">📊 Конкуренты</button>
 <button class="tab" onclick="showTab('tools')">🛠 AI Инструменты</button>
+<button class="tab" onclick="showTab('extra')">🚀 Ещё</button>
 <button class="tab" onclick="showTab('settings')">⚙️ Ключи</button>
 </div>
 
@@ -130,6 +131,46 @@ textarea{resize:vertical;min-height:80px}
 </div>
 </div>
 
+
+
+<!-- EXTRA TAB -->
+<div class="panel" id="panel-extra">
+<div class="card">
+<h3>📋 Генератор описания</h3>
+<p style="color:var(--text2);font-size:.8rem;margin-bottom:16px">Заголовок → описание для YouTube + TikTok + Instagram.</p>
+<div class="input-group"><label>Заголовок видео</label><input type="text" id="descInput" placeholder="What if an American ended up in a Russian prison"></div>
+<button class="btn btn-primary" onclick="generateDesc()">Сгенерировать</button>
+<div class="result" id="descResult"></div>
+</div>
+
+<div class="card">
+<h3>💡 Генератор идей (10 тем)</h3>
+<div class="input-group"><label>Ниша (необязательно)</label><input type="text" id="ideasInput" placeholder="what if russia, culture shock..."></div>
+<button class="btn btn-primary" onclick="generateIdeas()">🎲 Сгенерировать</button>
+<div class="result" id="ideasResult"></div>
+</div>
+
+<div class="card">
+<h3>🔤 Переводчик (нативный EN)</h3>
+<div class="input-group"><label>Текст на русском</label><textarea id="translateInput" placeholder="Вставь текст..."></textarea></div>
+<button class="btn btn-primary" onclick="translateText()">Перевести</button>
+<div class="result" id="translateResult"></div>
+</div>
+
+<div class="card">
+<h3>🎬 Промт для картинок</h3>
+<div class="input-group"><label>Описание сцены (рус)</label><input type="text" id="promptInput" placeholder="Американец в тюремном дворе, вокруг зеки"></div>
+<button class="btn btn-primary" onclick="generatePrompt()">Сделать промт</button>
+<div class="result" id="promptResult"></div>
+</div>
+
+<div class="card">
+<h3>📊 Калькулятор монетизации</h3>
+<div class="input-group"><label>Просмотры</label><input type="number" id="viewsInput" value="1000000"></div>
+<button class="btn btn-primary" onclick="calcMoney()">Посчитать</button>
+<div class="result" id="moneyResult"></div>
+</div>
+</div>
 
 <!-- SETTINGS TAB -->
 <div class="panel" id="panel-settings">
@@ -362,6 +403,45 @@ window.addEventListener('load', () => {
     if (gi && GROQ_KEY) gi.value = GROQ_KEY;
     if (yi && YT_KEY) yi.value = YT_KEY;
 });
+
+async function generateDesc() {
+    const input = document.getElementById('descInput').value;
+    if (!input) return;
+    const r = document.getElementById('descResult');
+    r.innerHTML = '<span class="loading">⏳ Генерирую...</span>';
+    r.innerHTML = await callAI('Generate descriptions for YouTube Shorts title: "' + input + '". Create: 1) YouTube desc (2 lines + hashtags) 2) TikTok caption (short + emojis + hashtags) 3) Instagram caption. All English, max reach.');
+}
+
+async function generateIdeas() {
+    const niche = document.getElementById('ideasInput').value || 'what if scenarios about Russia, culture shock, prison, military, daily life Russia vs USA';
+    const r = document.getElementById('ideasResult');
+    r.innerHTML = '<span class="loading">⏳ Думаю...</span>';
+    r.innerHTML = await callAI('Generate 10 viral YouTube Shorts ideas for niche: "' + niche + '". Each: clickbait title (max 60 chars) + 1-line concept. Target American audience. Include emojis. Sort by viral potential.');
+}
+
+async function translateText() {
+    const input = document.getElementById('translateInput').value;
+    if (!input) return;
+    const r = document.getElementById('translateResult');
+    r.innerHTML = '<span class="loading">⏳ Перевожу...</span>';
+    r.innerHTML = await callAI('Translate to natural American English (not literal). Make it sound native, dramatic, good for YouTube narration. Text: "' + input + '". Give: 1) Natural translation 2) More dramatic version.');
+}
+
+async function generatePrompt() {
+    const input = document.getElementById('promptInput').value;
+    if (!input) return;
+    const r = document.getElementById('promptResult');
+    r.innerHTML = '<span class="loading">⏳ Создаю...</span>';
+    r.innerHTML = await callAI('Convert this scene to an AI image prompt: "' + input + '". Style: hyper-realistic 3D render, cinematic lighting, dark moody atmosphere, ultra detailed, unreal engine, dramatic shadows, vertical 9:16, 8k. Output only the ready prompt.');
+}
+
+function calcMoney() {
+    const v = parseInt(document.getElementById('viewsInput').value) || 0;
+    const r = document.getElementById('moneyResult');
+    const lo = ((v/1000)*0.03).toFixed(2), mid = ((v/1000)*0.05).toFixed(2), hi = ((v/1000)*0.08).toFixed(2);
+    r.innerHTML = `📊 Доход от ${v.toLocaleString()} просмотров Shorts:\n\n💰 Мин (CPM $0.03): $${lo} (~${Math.round(lo*90)}₽)\n💰 Сред (CPM $0.05): $${mid} (~${Math.round(mid*90)}₽)\n💰 Макс (CPM $0.08): $${hi} (~${Math.round(hi*90)}₽)\n\n📌 1М просмотров ≈ $30-80 (2700-7200₽)\n📌 Для 100К₽/мес нужно ~15-30М просмотров`;
+}
+
 </script>
 </body>
 </html>
