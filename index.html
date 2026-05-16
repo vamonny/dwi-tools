@@ -154,13 +154,20 @@ textarea{resize:vertical;min-height:80px}
 <script>
 const YT_KEY = localStorage.getItem('yt_key') || '';
 
-// Check keys on load
-function checkKeys() {
-    if (!GROQ_KEY || !YT_KEY) {
-        showTab('settings');
+// Load keys from URL hash if present
+(function() {
+    const hash = window.location.hash;
+    if (hash.startsWith('#keys=')) {
+        const parts = hash.replace('#keys=', '').split('|');
+        if (parts[0]) localStorage.setItem('groq_key', parts[0]);
+        if (parts[1]) localStorage.setItem('yt_key', parts[1]);
+        window.location.hash = '';
+        location.reload();
     }
-}
-setTimeout(checkKeys, 100);
+    if (!localStorage.getItem('groq_key') || !localStorage.getItem('yt_key')) {
+        setTimeout(() => showTab('settings'), 100);
+    }
+})();
 const GROQ_KEY = localStorage.getItem('groq_key') || '';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
