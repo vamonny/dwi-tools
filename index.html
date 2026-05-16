@@ -55,6 +55,7 @@ textarea{resize:vertical;min-height:80px}
 <button class="tab" onclick="showTab('parser')">🔍 Парсер Shorts</button>
 <button class="tab" onclick="showTab('competitor')">📊 Конкуренты</button>
 <button class="tab" onclick="showTab('tools')">🛠 AI Инструменты</button>
+<button class="tab" onclick="showTab('settings')">⚙️ Ключи</button>
 </div>
 
 <!-- OPTIMIZE TAB -->
@@ -129,17 +130,37 @@ textarea{resize:vertical;min-height:80px}
 </div>
 </div>
 
+
+<!-- SETTINGS TAB -->
+<div class="panel" id="panel-settings">
+<div class="card">
+<h3>⚙️ API Ключи</h3>
+<p style="color:var(--text2);font-size:.8rem;margin-bottom:16px">Введи оба ключа и нажми Сохранить. Ключи хранятся только в твоём браузере.</p>
+<div class="input-group">
+<label>Groq API Key (для AI генерации)</label>
+<input type="text" id="groqKeyInput" placeholder="gsk_...">
+</div>
+<div class="input-group">
+<label>YouTube Data API Key (для парсера)</label>
+<input type="text" id="ytKeyInput" placeholder="AIzaSy...">
+</div>
+<button class="btn btn-primary" onclick="saveKeys()">💾 Сохранить ключи</button>
+<button class="btn btn-secondary" onclick="clearKeys()" style="margin-left:8px">🗑 Сбросить</button>
+<div class="result" id="keysResult"></div>
+</div>
+</div>
 </div>
 
 <script>
 const YT_KEY = localStorage.getItem('yt_key') || '';
 
-// Auto-set keys on first visit
-if (!localStorage.getItem('groq_key')) {
-    const k = prompt('Введи Groq API ключ (gsk_...):'); if(k) localStorage.setItem('groq_key', k);
-    const y = prompt('Введи YouTube API ключ:'); if(y) localStorage.setItem('yt_key', y);
-    location.reload();
+// Check keys on load
+function checkKeys() {
+    if (!GROQ_KEY || !YT_KEY) {
+        showTab('settings');
+    }
 }
+setTimeout(checkKeys, 100);
 const GROQ_KEY = localStorage.getItem('groq_key') || '';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
@@ -310,6 +331,30 @@ async function analyzeChannel() {
         result.innerHTML = '❌ Ошибка: ' + e.message;
     }
 }
+
+function saveKeys() {
+    const groq = document.getElementById('groqKeyInput').value.trim();
+    const yt = document.getElementById('ytKeyInput').value.trim();
+    if (groq) localStorage.setItem('groq_key', groq);
+    if (yt) localStorage.setItem('yt_key', yt);
+    document.getElementById('keysResult').innerHTML = '✅ Сохранено! Перезагружаю...';
+    setTimeout(() => location.reload(), 1000);
+}
+
+function clearKeys() {
+    localStorage.removeItem('groq_key');
+    localStorage.removeItem('yt_key');
+    document.getElementById('keysResult').innerHTML = '🗑 Ключи удалены. Перезагружаю...';
+    setTimeout(() => location.reload(), 1000);
+}
+
+// Fill inputs with current keys
+window.addEventListener('load', () => {
+    const gi = document.getElementById('groqKeyInput');
+    const yi = document.getElementById('ytKeyInput');
+    if (gi && GROQ_KEY) gi.value = GROQ_KEY;
+    if (yi && YT_KEY) yi.value = YT_KEY;
+});
 </script>
 </body>
 </html>
